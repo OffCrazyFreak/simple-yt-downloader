@@ -52,12 +52,13 @@ def download_and_extract_ffmpeg(destination_dir):
         raise
 
 
-def get_ffmpeg_location():
+def get_ffmpeg_location(force_download=False):
     """
     Determines the availability and location of ffmpeg.exe using these steps:
-      1. Check if ffmpeg.exe exists in the current directory (or the PyInstaller bundled folder).
-      2. If not, try running 'ffmpeg -version' to see if ffmpeg is available system-wide.
-      3. Only if neither is available, download and extract ffmpeg.exe.
+      1. If force_download is True, download and extract ffmpeg.exe to the base directory.
+      2. Otherwise, check if ffmpeg.exe exists in the current directory (or in the PyInstaller bundled folder).
+      3. If not found, try running 'ffmpeg -version' to see if ffmpeg is available system-wide.
+      4. Only if neither is available, download and extract ffmpeg.exe.
 
     Returns:
       - (True, <directory>) if a local copy is found or was successfully downloaded.
@@ -66,6 +67,19 @@ def get_ffmpeg_location():
     """
     base_dir = sys._MEIPASS if hasattr(sys, "_MEIPASS") else os.path.abspath(".")
     local_ffmpeg = os.path.join(base_dir, "ffmpeg.exe")
+
+    if force_download:
+        print("Force downloading ffmpeg.exe...")
+        try:
+            download_and_extract_ffmpeg(base_dir)
+            if os.path.exists(os.path.join(base_dir, "ffmpeg.exe")):
+                return True, base_dir
+            else:
+                return False, ""
+        except Exception as e:
+            print("Force download failed:", e)
+            return False, ""
+
     if os.path.exists(local_ffmpeg):
         print("Found ffmpeg.exe locally in:", base_dir)
         return True, base_dir
@@ -94,7 +108,9 @@ def get_ffmpeg_location():
 
 
 if __name__ == "__main__":
-    available, location = get_ffmpeg_location()
+    # Check if a "--force" argument was passed to force download.
+    force = "--force" in sys.argv
+    available, location = get_ffmpeg_location(force_download=force)
     if available:
         if location:
             print(f"FFmpeg is available locally at: {location}")
