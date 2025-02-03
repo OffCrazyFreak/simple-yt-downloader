@@ -107,7 +107,6 @@ def download_video(url, download_path, status_callback):
             command.extend(["--ffmpeg-location", ffmpeg_loc])
         command.append(url)
 
-        status_callback(f"Starting download: {url}")
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
@@ -163,7 +162,6 @@ def download_audio(url, download_path, status_callback):
             command.extend(["--ffmpeg-location", ffmpeg_loc])
         command.append(url)
 
-        status_callback(f"Starting download: {url}")
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
