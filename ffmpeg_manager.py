@@ -9,11 +9,12 @@ import shutil
 # URL for FFmpeg essentials build (ffmpeg.exe is inside the ZIP)
 FFMPEG_ZIP_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
 
+
 def download_and_extract_ffmpeg(destination_dir):
     """
     Downloads the FFmpeg essentials ZIP from FFMPEG_ZIP_URL,
     extracts ffmpeg.exe, and places it in destination_dir.
-    
+
     Returns the full path to ffmpeg.exe if successful.
     """
     try:
@@ -27,7 +28,7 @@ def download_and_extract_ffmpeg(destination_dir):
                     tmp_file.write(chunk)
             tmp_zip_path = tmp_file.name
         print("Download complete. Extracting ffmpeg.exe...")
-        with zipfile.ZipFile(tmp_zip_path, 'r') as zip_ref:
+        with zipfile.ZipFile(tmp_zip_path, "r") as zip_ref:
             exe_name = None
             # Look for ffmpeg.exe (case-insensitive)
             for name in zip_ref.namelist():
@@ -50,19 +51,20 @@ def download_and_extract_ffmpeg(destination_dir):
         print(f"Failed to download and extract ffmpeg: {e}")
         raise
 
+
 def get_ffmpeg_location():
     """
     Determines the availability and location of ffmpeg.exe using these steps:
       1. Check if ffmpeg.exe exists in the current directory (or the PyInstaller bundled folder).
       2. If not, try running 'ffmpeg -version' to see if ffmpeg is available system-wide.
       3. Only if neither is available, download and extract ffmpeg.exe.
-    
+
     Returns:
       - (True, <directory>) if a local copy is found or was successfully downloaded.
       - (True, "") if a system-installed ffmpeg is available.
       - (False, "") if ffmpeg is not available.
     """
-    base_dir = sys._MEIPASS if hasattr(sys, '_MEIPASS') else os.path.abspath(".")
+    base_dir = sys._MEIPASS if hasattr(sys, "_MEIPASS") else os.path.abspath(".")
     local_ffmpeg = os.path.join(base_dir, "ffmpeg.exe")
     if os.path.exists(local_ffmpeg):
         print("Found ffmpeg.exe locally in:", base_dir)
@@ -70,8 +72,12 @@ def get_ffmpeg_location():
     else:
         print("ffmpeg.exe not found locally.")
         try:
-            return False, "" #TEMP
-            subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            subprocess.run(
+                ["ffmpeg", "-version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
             print("System ffmpeg is available.")
             return True, ""
         except Exception:
@@ -86,7 +92,8 @@ def get_ffmpeg_location():
                 print("Download failed:", e)
                 return False, ""
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     available, location = get_ffmpeg_location()
     if available:
         if location:
