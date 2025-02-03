@@ -257,7 +257,8 @@ def update_status(message):
 
 
 root = tk.Tk()
-root.title("YouTube Videos Downloader (by CrazyFreak)")
+root.iconphoto(True, tk.PhotoImage(file="icon.png"))
+root.title("Simple YT downloader (by CrazyFreak)")
 root.geometry("500x120")
 root.resizable(False, False)
 
