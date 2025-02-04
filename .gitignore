@@ -3,5 +3,7 @@ __pycache__
 
 ffmpeg.exe
 ffmpeg*
+
 build/
-yt_downloader.spec
+dist/
+*.spec

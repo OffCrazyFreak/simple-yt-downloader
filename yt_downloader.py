@@ -7,19 +7,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-
-# Ensure that the yt-dlp module is installed.
-def install_if_missing(package, package_name=None):
-    try:
-        __import__(package)
-    except ImportError:
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", package_name or package]
-        )
-
-
-install_if_missing("yt_dlp", "yt-dlp")
-
 # Import ffmpeg management functions from ffmpeg_manager.py
 from ffmpeg_manager import get_ffmpeg_location, download_and_extract_ffmpeg
 
@@ -257,9 +244,10 @@ def update_status(message):
 
 
 root = tk.Tk()
-root.iconphoto(True, tk.PhotoImage(file="icon.png"))
+if os.path.exists("icon.ico"):
+    root.iconbitmap("icon.ico")
 root.title("Simple YT downloader (by CrazyFreak)")
-root.geometry("500x120")
+root.geometry("500x150")
 root.resizable(False, False)
 
 # Create a main container frame with 10px padding on left and right.
@@ -268,12 +256,33 @@ main_frame.pack(expand=True, fill="both")
 
 # Frame for URL input with label.
 input_frame = ttk.Frame(main_frame)
-input_frame.pack(pady=(10, 10))
-url_label = ttk.Label(input_frame, text="Enter YouTube URL:")
+input_frame.pack(pady=(10, 5))
+url_label = ttk.Label(input_frame, text="YouTube URL:")
 url_label.pack(side="left", padx=(0, 5))
 url_entry = ttk.Entry(input_frame, width=80)
 url_entry.pack(side="left")
 url_entry.focus()
+
+# --- Destination Folder Input ---
+destination_frame = ttk.Frame(main_frame)
+destination_frame.pack(pady=(0, 10))
+dest_label = ttk.Label(destination_frame, text="Destination folder:")
+dest_label.pack(side="left", padx=(0, 5))
+# Default to the Downloads folder.
+default_downloads = os.path.join(os.path.expanduser("~"), "Downloads")
+dest_var = tk.StringVar(value=default_downloads)
+destination_entry = ttk.Entry(destination_frame, textvariable=dest_var, width=50)
+destination_entry.pack(side="left", padx=(0, 5))
+
+
+def browse_folder():
+    folder = filedialog.askdirectory(title="Select Download Folder")
+    if folder:
+        dest_var.set(folder)
+
+
+browse_button = ttk.Button(destination_frame, text="Browse", command=browse_folder)
+browse_button.pack(side="left")
 
 # Frame for buttons.
 button_frame = ttk.Frame(main_frame)
@@ -309,9 +318,12 @@ def start_video_download():
     if not url:
         messagebox.showwarning("Input Needed", "Please enter a YouTube URL.")
         return
-    download_path = filedialog.askdirectory(title="Select Download Folder")
-    if not download_path:
+
+    download_path = dest_var.get().strip()
+    if not download_path or not os.path.isdir(download_path):
+        messagebox.showwarning("Input Needed", "Please enter a valid download folder.")
         return
+
     threading.Thread(
         target=process_video_download,
         args=(url, download_path, update_status),
@@ -348,9 +360,12 @@ def start_audio_download():
     if not url:
         messagebox.showwarning("Input Needed", "Please enter a YouTube URL.")
         return
-    download_path = filedialog.askdirectory(title="Select Download Folder")
-    if not download_path:
+
+    download_path = dest_var.get().strip()
+    if not download_path or not os.path.isdir(download_path):
+        messagebox.showwarning("Input Needed", "Please enter a valid download folder.")
         return
+
     threading.Thread(
         target=process_audio_download,
         args=(url, download_path, update_status),
